@@ -7,7 +7,7 @@
 # 0: Success
 # other: Error
 
-usage = "./$(basename "$0") [-h] -- Install Docker Engine on Ubuntu.\n\n
+usage="./$(basename "$0") [-h] -- Install Docker Engine on Ubuntu.\n\n
 Where:
 \t -h  Show this help.
 "
@@ -47,4 +47,7 @@ sudo apt-get install \
     docker-ce-cli \
     containerd.io \
     docker-compose-plugin
-sudo docker run hello-world
+
+echo -e "\033[46m------------------------------------------------------\033[0m"
+
+sudo docker run --rm hello-world
