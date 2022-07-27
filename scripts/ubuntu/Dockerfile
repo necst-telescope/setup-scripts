@@ -3,7 +3,7 @@
 
 FROM ros:humble-ros-base
 
-RUN apt update && apt install -y \
+RUN apt-get -qq update && apt-get -qq install -y \
     curl \
     emacs \
     git \
@@ -23,7 +23,7 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # Set-up NECST
-RUN git pull && :
+# RUN git pull && :
 
 # Download NECST ROS package
 # ENV NECST_ROOT="$HOME/.necst"
