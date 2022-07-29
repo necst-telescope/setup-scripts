@@ -8,7 +8,7 @@
 # other: Error
 
 usage="./$(basename "$0") [-h] -- Install Docker Engine on Ubuntu.\n\n
-Where:
+Where:\n
 \t -h  Show this help.
 "
 
@@ -21,11 +21,11 @@ do
 done
 
 # Remove older versions
-sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get -qqy remove docker docker-engine docker.io containerd runc
 
 # Set-up Docker repository
-sudo apt-get update
-sudo apt-get install \
+sudo apt-get -qqy update
+sudo apt-get -qqy install \
     ca-certificates \
     curl \
     gnupg \
@@ -41,8 +41,8 @@ echo \
 sudo chmod +r /etc/apt/keyrings/docker.gpg
 
 # Install Docker Engine
-sudo apt-get update
-sudo apt-get install \
+sudo apt-get -qqy update
+sudo apt-get -qqy install \
     docker-ce \
     docker-ce-cli \
     containerd.io \
@@ -51,3 +51,4 @@ sudo apt-get install \
 echo -e "\033[46m------------------------------------------------------\033[0m"
 
 sudo docker run --rm hello-world
+
