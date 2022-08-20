@@ -5,31 +5,51 @@
 
 # Exit code:
 # 0: Success
-# other: Error
+# 1: Permission error
 
-usage="./$(basename "$0") [-h] -- Install Docker Engine on Ubuntu.\n\n
+usage="./$(basename "$0") [-h] [-u str] -- Install Docker Engine on Ubuntu.\n\n
 Where:\n
-\t -h  Show this help.
+\t -h  Show this help.\n
+\t -u  Specify which user to install docker for, defaults to current user.
 "
 
-while getopts 'h' option
+# Default value
+INSTALL_USER=$USER
+
+while getopts 'hu:' option
 do
     case "$option" in
         h) echo -e $usage
-            exit 0;;
+            exit 0 ;;
+        u) INSTALL_USER=$OPTARG ;;
     esac
 done
 
+# Check if sudo-able
+if ! (sudo true > /dev/null 2>&1)
+then
+    echo -e "\033[41;1mRun this script with sudo privilege.\033[0m"
+    echo -e "If you need to install on a non-root user, please specify the user name.\n"
+    echo -e ${usage}
+    exit 1
+fi
+
 # Remove older versions
-sudo apt-get -qqy remove docker docker-engine docker.io containerd runc
+sudo apt-get -qqy remove \
+    docker \
+    docker-engine \
+    docker.io \
+    containerd \
+    runc
+sudo snap remove docker
 
 # Set-up Docker repository
-sudo apt-get -qqy update
-sudo apt-get -qqy install \
+sudo apt-get -qqy update && sudo apt-get -qqy install \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release
+    lsb-release \
+    sudo
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
     | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -41,14 +61,23 @@ echo \
 sudo chmod +r /etc/apt/keyrings/docker.gpg
 
 # Install Docker Engine
-sudo apt-get -qqy update
-sudo apt-get -qqy install \
+sudo apt-get -qqy update && sudo apt-get -qqy install \
+    containerd.io \
     docker-ce \
     docker-ce-cli \
-    containerd.io \
-    docker-compose-plugin
+    docker-compose-plugin \
+    ssh-askpass
 
-echo -e "\033[46m------------------------------------------------------\033[0m"
+# Use docker without sudo
+sudo groupadd docker && :
+sudo gpasswd -a $INSTALL_USER docker
+sudo systemctl restart docker
 
-sudo docker run --rm hello-world
+echo -e "\033[46m----------------------------------------------------------------\033[0m"
 
+if docker run --rm hello-world > /dev/null 2>&1
+then
+    echo -e "\033[46mPlease re-login to complete set-up.\033[0m"
+else
+    echo -e "\033[41mFailed to install docker.\033[0m"
+fi
