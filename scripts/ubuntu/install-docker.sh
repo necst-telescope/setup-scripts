@@ -25,8 +25,10 @@ do
     esac
 done
 
+
+
 # Check if sudo-able
-if ! (sudo true > /dev/null 2>&1)
+if ! [ $(id -g) = 0 ]
 then
     echo -e "\033[41;1mRun this script with sudo privilege.\033[0m"
     echo -e "If you need to install on a non-root user, please specify the user name.\n"
@@ -35,33 +37,32 @@ then
 fi
 
 # Remove older versions
-sudo apt-get -qqy remove \
+apt-get -qqy remove \
     docker \
     docker-engine \
     docker.io \
     containerd \
     runc
-sudo snap remove docker
+snap remove docker && :
 
 # Set-up Docker repository
-sudo apt-get -qqy update && sudo apt-get -qqy install \
+apt-get -qqy update && apt-get -qqy install \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release \
-    sudo
-sudo mkdir -p /etc/apt/keyrings
+    lsb-release
+mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-    | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo \
     "deb [arch=$(dpkg --print-architecture) \
     signed-by=/etc/apt/keyrings/docker.gpg] \
     https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
-    | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo chmod +r /etc/apt/keyrings/docker.gpg
+    | tee /etc/apt/sources.list.d/docker.list > /dev/null
+chmod +r /etc/apt/keyrings/docker.gpg
 
 # Install Docker Engine
-sudo apt-get -qqy update && sudo apt-get -qqy install \
+apt-get -qqy update && apt-get -qqy install \
     containerd.io \
     docker-ce \
     docker-ce-cli \
@@ -69,9 +70,9 @@ sudo apt-get -qqy update && sudo apt-get -qqy install \
     ssh-askpass
 
 # Use docker without sudo
-sudo groupadd docker && :
-sudo gpasswd -a $INSTALL_USER docker
-sudo systemctl restart docker
+groupadd docker && :
+gpasswd -a $INSTALL_USER docker
+systemctl restart docker
 
 echo -e "\033[46m----------------------------------------------------------------\033[0m"
 
